@@ -1,0 +1,26 @@
+### using REST client extention - works similar like postman :)
+GET http://localhost:3001/transactions
+
+###
+POST http://localhost:3001/auth/login
+Content-Type: application/json
+
+{
+    "email":"ak@gmail.com",
+    "password":"asasas"
+}
+
+###
+POST http://localhost:3001/transactions/transaction/add 
+Content-Type: application/json
+
+{
+    "name":"my new test tool",
+    "amount":10
+}
+
+###
+GET http://localhost:3001/auth/isloggedIn
+
+###
+GET http://localhost:3001/auth/users
