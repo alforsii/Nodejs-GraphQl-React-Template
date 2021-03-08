@@ -1,5 +1,4 @@
 const bcryptjs = require("bcryptjs");
-const { json } = require("express");
 const jwt = require("jsonwebtoken");
 const User = require("../../models/User.model");
 
@@ -19,7 +18,6 @@ module.exports = {
     }
   },
   login: async ({ email, password }) => {
-    console.log("🚀login: ~ { email, password }", { email, password });
     try {
       const user = await User.findOne({ email });
       if (!user) {
@@ -41,27 +39,39 @@ module.exports = {
       return err;
     }
   },
-  isLoggedIn: async (args, req) => {
-    console.log("isLoggedIn: ~ args", args);
-    console.log(req.isAuth);
+  isLoggedIn: ({ token }) => {
+    if (!token || token === "") {
+      return null;
+    }
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.SECRET_TOKEN);
+    } catch (err) {
+      return null;
+    }
+    if (!decodedToken) {
+      return null;
+    }
+
+    return { userId: decodedToken.userId, token, tokenExpiration: 1 };
+  },
+  allUsers: async (args, req) => {
     if (!req.isAuth) {
       throw new Error("Not authorized!");
     }
-
-    return await User.findById(req.userId);
-  },
-  allUsers: async () => {
     return await User.find().sort({ _id: 1 });
   },
   someUsers: async ({ page, limit }, req) => {
-    console.log(req.isAuth);
     if (!req.isAuth) {
       throw new Error("Not authorized!");
     }
     const skip = page * limit;
     return await User.find().sort({ _id: 1 }).skip(skip).limit(limit);
   },
-  getUser: async ({ id }) => {
+  getUser: async ({ id }, req) => {
+    if (!req.isAuth) {
+      throw new Error("Not authorized!");
+    }
     try {
       return await User.findById(id);
     } catch (err) {

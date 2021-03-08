@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { AuthContext } from "../../context/AuthContext";
 
 export default class Login extends Component {
   constructor(props) {
@@ -6,6 +7,8 @@ export default class Login extends Component {
     this.emailEl = React.createRef();
     this.passwordEl = React.createRef();
   }
+
+  static contextType = AuthContext;
 
   handleLoginSubmit = (e) => {
     e.preventDefault();
@@ -37,14 +40,18 @@ export default class Login extends Component {
       },
     })
       .then((res) => {
-        console.log("🚀 ~ res", res);
         if (res.status !== 200 && res.status !== 201) {
           throw new Error("Req failed!");
         }
         return res.json();
       })
-      .then((data) => {
-        console.log(data);
+      .then((res) => {
+        // console.log(data);
+        // this.props.updateState({ isLoggedIn: true });
+        // console.log("🚀 ~ this.props", this.props);
+        this.context.login(res.data.login);
+
+        this.props.history.push("/");
       })
       .catch((err) => console.log(err));
   };

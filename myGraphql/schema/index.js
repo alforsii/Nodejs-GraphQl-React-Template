@@ -25,7 +25,7 @@ const graphqlSchema = buildSchema(`
         type RootQuery {
             allUsers: [User!]!
             getUser(id:ID!):User
-            isLoggedIn: User!
+            isLoggedIn(token: String!): AuthData!
             someUsers(page:Int!,limit:Int!):[User!]!
             login(email: String!,password: String!): AuthData! 
         }
