@@ -1,0 +1,47 @@
+#myModal {
+  position: fixed;
+  top: 10vh;
+  left: 0;
+  right: 0;
+  width: 100%;
+  /* height: 100vh; */
+
+  background: rgba(0, 0, 0, 0.25);
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); */
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation-name: fade-in;
+  animation-timing-function: ease-in;
+  animation-duration: 0.15s;
+  animation-fill-mode: forwards;
+  opacity: 0;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.myModalHeader {
+  background-color: rgb(6, 155, 241);
+  padding: 1rem;
+}
+.myModalHeader h2 {
+  margin: 0;
+}
+.modalSection {
+  margin: 0 auto;
+}
+
+/* @media (min-width: 768px) {
+  .myModal {
+    width: 30rem;
+
+    left: calc((100%-30rem) / 2);
+  }
+} */

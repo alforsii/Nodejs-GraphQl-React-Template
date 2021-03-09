@@ -4,6 +4,8 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
+import "materialize-css"; // It installs the JS asset only
+import "materialize-css/dist/css/materialize.min.css";
 
 ReactDOM.render(
   <React.StrictMode>

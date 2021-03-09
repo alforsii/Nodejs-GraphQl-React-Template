@@ -6,7 +6,7 @@ export default function Main() {
     <AuthContext.Consumer>
       {(context) => {
         return (
-          <div>
+          <div style={{ marginTop: "70px" }}>
             <h2>Home page</h2>
             <button onClick={context.logout}>logout</button>
           </div>

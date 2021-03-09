@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
 import Login from "./components/auth/Login";
-import Navbar from "./components/nav/Navbar";
+import Navbar from "./components/nav/MyNavbar";
 import Home from "./components/Home";
 
 import { AuthContext } from "./context/AuthContext";
 import "./App.css";
+// import Signup from "./components/auth/Signup";
+// import MyModal from "./components/modal/MyModal";
 
 export default class App extends Component {
   state = {
@@ -13,6 +15,7 @@ export default class App extends Component {
     token: null,
     userId: null,
     tokenExpiration: null,
+    message: null,
   };
 
   componentDidMount() {
@@ -50,7 +53,7 @@ export default class App extends Component {
       },
     })
       .then((res) => {
-        console.log("🚀 .then ~ res", res);
+        console.log("🚀 ~ .then ~ res", res);
         if (res.status !== 200 && res.status !== 201) {
           throw new Error("Req failed!");
         }
@@ -66,7 +69,9 @@ export default class App extends Component {
           // }));
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   login = (data) => {
@@ -103,25 +108,29 @@ export default class App extends Component {
           value={{
             userId: this.state.userId,
             token: this.state.token,
+            state: this.state,
             login: this.login,
             logout: this.logout,
+            updateState: this.updateState,
           }}
         >
           <Navbar />
-          <Switch>
-            {!this.state.isLoggedIn && <Redirect from="/" to="/login" exact />}
-            {this.state.isLoggedIn && (
-              <Route path="/" component={(props) => <Home {...props} />} />
-            )}
-            {!this.state.isLoggedIn && (
-              <Route
-                path="/login"
-                component={(props) => (
-                  <Login {...props} updateState={this.updateState} />
-                )}
-              />
-            )}
-          </Switch>
+          <main style={{ margin: 0, padding: 0 }}>
+            <Switch>
+              {!this.state.isLoggedIn && (
+                <Redirect from="/" to="/login" exact />
+              )}
+
+              {this.state.isLoggedIn && <Redirect from="/login" to="/" exact />}
+              {this.state.isLoggedIn && (
+                <Route path="/" component={(props) => <Home {...props} />} />
+              )}
+              {!this.state.isLoggedIn && (
+                <Route path="/login" component={Login} />
+              )}
+              <Redirect from="/" to="/login" />
+            </Switch>
+          </main>
         </AuthContext.Provider>
       </>
     );
