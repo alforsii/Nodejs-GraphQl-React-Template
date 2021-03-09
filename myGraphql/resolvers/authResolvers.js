@@ -2,6 +2,12 @@ const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../../models/User.model");
 
+const generateToken = (userId, email) => {
+  return jwt.sign({ userId, email }, process.env.SECRET_TOKEN, {
+    expiresIn: "1d",
+  });
+};
+
 module.exports = {
   signup: async ({ data }) => {
     try {
@@ -10,7 +16,7 @@ module.exports = {
       const hashedPassword = await bcryptjs.hash(data.password, 10);
       data.password = hashedPassword;
       user = await User.create(data);
-      user.message = "User successfully signed up!";
+
       return user;
     } catch (err) {
       console.log(err);
@@ -28,11 +34,7 @@ module.exports = {
         throw new Error("Wrong password!");
       }
 
-      const token = jwt.sign(
-        { userId: user.id, email },
-        process.env.SECRET_TOKEN,
-        { expiresIn: "1h" }
-      );
+      const token = generateToken(user.id, email);
       return { userId: user.id, token, tokenExpiration: 1 };
     } catch (err) {
       console.log(err);
@@ -47,31 +49,24 @@ module.exports = {
     try {
       decodedToken = jwt.verify(token, process.env.SECRET_TOKEN);
     } catch (err) {
-      return null;
-    }
-    if (!decodedToken) {
-      return null;
+      console.log(err.message);
+      return err;
     }
 
+    if (!decodedToken || !decodedToken.userId || !decodedToken.email) {
+      throw new Error("Not authorized!");
+    }
+    // const newToken = generateToken(decodedToken.userId, decodedToken.email);
     return { userId: decodedToken.userId, token, tokenExpiration: 1 };
   },
   allUsers: async (args, req) => {
-    if (!req.isAuth) {
-      throw new Error("Not authorized!");
-    }
     return await User.find().sort({ _id: 1 });
   },
   someUsers: async ({ page, limit }, req) => {
-    if (!req.isAuth) {
-      throw new Error("Not authorized!");
-    }
     const skip = page * limit;
     return await User.find().sort({ _id: 1 }).skip(skip).limit(limit);
   },
   getUser: async ({ id }, req) => {
-    if (!req.isAuth) {
-      throw new Error("Not authorized!");
-    }
     try {
       return await User.findById(id);
     } catch (err) {
