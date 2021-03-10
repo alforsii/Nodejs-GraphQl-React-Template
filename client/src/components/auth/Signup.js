@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import { myToaster } from "../../auth/helpers";
+import axios from "axios";
 
 export default class Signup extends Component {
   constructor(props) {
@@ -8,14 +10,24 @@ export default class Signup extends Component {
     this.passwordEl = React.createRef();
     this.firstNameEl = React.createRef();
     this.lastNameEl = React.createRef();
-    this.state = {
-      errMessage: "",
-    };
   }
+  state = {
+    message: "",
+  };
   // 1. One way of setting contextType for the class component
   static contextType = AuthContext;
 
-  componentWillUnmount = () => {};
+  componentWillUnmount = () => {
+    this.clearForm();
+    console.log("SIGNUP CLEARED");
+  };
+
+  clearForm = () => {
+    this.emailEl.current.value = "";
+    this.passwordEl.current.value = "";
+    this.firstNameEl.current.value = "";
+    this.lastNameEl.current.value = "";
+  };
 
   handleSignupSubmit = (e) => {
     e.preventDefault();
@@ -33,49 +45,81 @@ export default class Signup extends Component {
     ) {
       return this.setState((prevState) => ({
         ...prevState,
-        errMessage: "All fields are mandatory!",
+        message: "All fields are mandatory!",
       }));
     }
+    const newUser = { email, password, firstName, lastName };
     let requestBody = {
       query: `
-        mutation {
-          signup(data: { email:"${email}",password: "${password}",firstName:"${firstName}",lastName:"${lastName}"}) {
+
+        mutation Signup($email:String!,$password:String!,$firstName:String!,$lastName:String!){
+          signup(data: {email:$email,password: $password,firstName:$firstName,lastName:$lastName}) {
             _id
             email
+            message
           }
         }
       `,
+      variables: newUser,
     };
 
-    fetch("http://localhost:3001/graphql", {
-      method: "POST",
-      body: JSON.stringify(requestBody),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Req failed!");
-        }
-        return res.json();
-      })
+    axios
+      .post("http://localhost:3001/graphql", requestBody)
       .then((res) => {
         console.log(res);
-        // this.props.updateState({ isLoggedIn: true });
-        // console.log("🚀 ~ this.props", this.props);
+
+        const msg = res.data.data.signup?.message;
+        if (res.status === 200 && msg) {
+          myToaster(msg, "yellow");
+          return this.setState({
+            message: msg,
+          });
+        }
+
         this.context.updateState({
           message: "Signup successful, please login now!",
         });
         this.props.closeSignupForm();
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        myToaster("Something went wrong! 😕", "yellow");
+        this.setState({
+          message: "Something went wrong! 😕",
+        });
+        // this.clearForm();
+      });
+
+    //   2. Another way using fetch, but will not response error message :(
+    // fetch("http://localhost:3001/graphql", {
+    //   method: "POST",
+    //   body: JSON.stringify(requestBody),
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    // })
+    //   .then((res) => {
+    //     if (res.status !== 200 && res.status !== 201) {
+    //       throw new Error("Req failed!");
+    //     }
+    //     return res.json();
+    //   })
+    //   .then((res) => {
+    //     console.log(res);
+    //     // this.props.updateState({ isLoggedIn: true });
+    //     // console.log("🚀 ~ this.props", this.props);
+    //     this.context.updateState({
+    //       message: "Signup successful, please login now!",
+    //     });
+    //     this.props.closeSignupForm();
+    //   })
+    //   .catch((err) => console.log(err));
   };
   render() {
     return (
       <form style={{ width: "500px" }} onSubmit={this.handleSignupSubmit}>
         <span style={{ padding: 10 }} className="red-text">
-          {this.state.errMessage && this.state.errMessage}
+          {this.state.message && this.state.message}
         </span>
         <div
           style={{
@@ -88,7 +132,7 @@ export default class Signup extends Component {
             <div className="">
               <div className="row">
                 <div className="input-field col s12 m10 offset-m1">
-                  <h4>Signup</h4>
+                  <h4 className="blue-text">Signup</h4>
                 </div>
                 <div className="input-field col s12 m10 offset-m1">
                   <input
@@ -126,10 +170,14 @@ export default class Signup extends Component {
                   />
                   <label htmlFor="lastName">lastName</label>
                 </div>
-                <div className="col s8 offset-s2">
+                <div
+                  style={{ display: "flex", justifyContent: "flex-end" }}
+                  className="col s12 m10 offset-m1"
+                >
                   <button
                     onClick={this.props.closeSignupForm}
                     className="btn btn-flat noHover"
+                    style={{ marginRight: 10 }}
                   >
                     Cancel
                   </button>

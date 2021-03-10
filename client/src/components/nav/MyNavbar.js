@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 // import { Icon, Navbar, NavItem } from "react-materialize";
 import "./MyNavbar.css";
 
-export default function MyNavbar() {
+export default function MyNavbar({ updateState, logout, token }) {
   return (
     <nav style={{ position: "fixed", left: 0, top: 0 }}>
       <div className="nav-wrapper blue" style={{ paddingLeft: 20 }}>
@@ -15,7 +15,19 @@ export default function MyNavbar() {
             <NavLink to="/">Home</NavLink>
           </li>
           <li>
-            <NavLink to="/login">Login</NavLink>
+            {/* <button>Signup</button> */}
+            {token ? (
+              <NavLink to="/" onClick={() => logout()}>
+                Logout
+              </NavLink>
+            ) : (
+              <NavLink
+                to="/login"
+                onClick={() => updateState({ signupForm: true })}
+              >
+                Signup
+              </NavLink>
+            )}
           </li>
         </ul>
       </div>

@@ -6,8 +6,6 @@ import Home from "./components/Home";
 
 import { AuthContext } from "./context/AuthContext";
 import "./App.css";
-// import Signup from "./components/auth/Signup";
-// import MyModal from "./components/modal/MyModal";
 
 export default class App extends Component {
   state = {
@@ -16,6 +14,8 @@ export default class App extends Component {
     userId: null,
     tokenExpiration: null,
     message: null,
+    errMessage: null,
+    signupForm: false,
   };
 
   componentDidMount() {
@@ -33,17 +33,20 @@ export default class App extends Component {
     if (!authUser || !authUser?.token) {
       return;
     }
-    console.log("🚀 ~~ authUser", authUser);
+
     const requestBody = {
       query: `
-       query {
-         isLoggedIn(token:"${authUser?.token}") {
+       query IsLoggedIn($token: String!){
+         isLoggedIn(token:$token) {
            token
            userId
            tokenExpiration
          }
        }
       `,
+      variables: {
+        token: authUser.token,
+      },
     };
     fetch("http://localhost:3001/graphql", {
       method: "POST",
@@ -114,7 +117,11 @@ export default class App extends Component {
             updateState: this.updateState,
           }}
         >
-          <Navbar />
+          <Navbar
+            updateState={this.updateState}
+            logout={this.logout}
+            token={this.state.token}
+          />
           <main style={{ margin: 0, padding: 0 }}>
             <Switch>
               {!this.state.isLoggedIn && (
