@@ -20,17 +20,19 @@ module.exports = {
       return user;
     } catch (err) {
       console.log(err);
-      return err;
+      return { message: err.message };
     }
   },
-  login: async ({ email, password }) => {
+  login: async ({ email, password }, req) => {
     try {
       const user = await User.findOne({ email });
       if (!user) {
+        // return { userId: null, token: null, message: "User not found!" };
         throw new Error("User not found!");
       }
       const isEqual = await bcryptjs.compare(password, user.password);
       if (!isEqual) {
+        // return { userId: null, token: null, message: "Incorrect password!" };
         throw new Error("Wrong password!");
       }
 
@@ -38,7 +40,7 @@ module.exports = {
       return { userId: user.id, token, tokenExpiration: 1 };
     } catch (err) {
       console.log(err);
-      return err;
+      return { message: err.message };
     }
   },
   isLoggedIn: ({ token }) => {

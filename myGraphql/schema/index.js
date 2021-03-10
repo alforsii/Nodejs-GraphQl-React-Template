@@ -3,10 +3,11 @@ const { buildSchema } = require("graphql");
 const graphqlSchema = buildSchema(`
         type User {
             _id: ID
-            email: String!
-            firstName: String!
-            lastName: String!
-            createdAt: String!
+            email: String
+            firstName: String
+            lastName: String
+            message: String
+            createdAt: String
         }
 
         input SignupInput {
@@ -17,9 +18,10 @@ const graphqlSchema = buildSchema(`
         }
 
         type AuthData {
-            userId:ID!
-            token: String!
-            tokenExpiration: Int!
+            userId:ID
+            token: String
+            tokenExpiration: Int
+            message: String
         }
 
         type RootQuery {
